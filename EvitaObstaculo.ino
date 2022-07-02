@@ -14,8 +14,11 @@ int echo = 3;
 int tiempo;
 int distancia;
 
+int led12 = 12;
+int ldr = 0;
+int ldr_valor = 0;
 
-
+int cont = 0;
 void setup()
 {
   Serial.begin(9600);
@@ -32,25 +35,29 @@ void setup()
   pinMode(trig, OUTPUT);
   pinMode(echo, INPUT);
   
+  pinMode(led12, OUTPUT);
+  
 }
 
 void loop()
 {
-  //i = Contador de los lados
-  for(int i=1; i<=4; i++){
-    Serial.print("Lado N ");
-    Serial.println(i);
-    
-    girarCuadrado(); 
-    
+  luz(); //Busca el nivel de luz
+  cont++;
+  Serial.print("Lado: ");
+  Serial.println(cont);
+  girarCuadrado(); //Avanza y gira el auto
+  
+  if(cont == 4){
+    Stop();
+    Serial.println("Stop...");
+    delay(5000); 
+    cont = 0;
   }
-  Stop();
-  Serial.println("Stop...");
-  delay(5000);
-    
+  
 }
-//<------ Gira en Cuadrado 1 metro---->
-void girarCuadrado(){
+
+//<------ Gira el autito en Cuadrado 1 metro---->
+void girarCuadrado(){ 
     Adelante();
     buscarObjeto();//<------
     delay(5000);
@@ -64,7 +71,10 @@ void buscarObjeto(){
   digitalWrite(trig,LOW);
   tiempo = pulseIn(echo,HIGH);
   distancia = tiempo/58.2; //Tiempo en segundos
-  Serial.println(distancia);
+  
+  Serial.print("Objeto a: ");
+  Serial.print(distancia);
+  Serial.println("cm");
   delay(500);
   
   if(distancia <50){
@@ -92,7 +102,22 @@ void esquivar(){
     Derecha();
     delay(3000);
 }
-
+//<-------Detecta Luz----->
+void luz(){
+  ldr_valor = analogRead(ldr);
+  Serial.print("LDR=");
+  Serial.println(ldr_valor);
+  if(ldr_valor>=500){
+    digitalWrite(led12, HIGH);
+  }
+  else{
+    if(ldr_valor<500){
+      digitalWrite(led12, LOW);
+      
+    }
+    
+  }
+}
 
 //<-------- Motores -------->
 void Adelante(){
